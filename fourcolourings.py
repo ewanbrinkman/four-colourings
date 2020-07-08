@@ -2,8 +2,8 @@ from random import shuffle
 
 # all available colours to use are stored in this list. When choosing
 # colours for vertices, vertices will be given numbers that represent a
-# colour. colours[0] will be 1, colours[1] will be 2, and so on. A colour of
-# 0 means no colour has been chosen yet
+# colour. 1 will represent colors[0], 2 will represent colors[1], and so on. A
+# colour of 0 means no colour has been chosen yet
 colours = ["red", "yellow", "green", "blue"]
 
 # dictionary to hold all the vertex's colours and their connected vertices
