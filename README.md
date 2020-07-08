@@ -1,2 +1,5 @@
-# four-colorings
-A program to color vertices, so that no adjacent vertices share the same color.
+# four-colourings
+A program to colour connected vertices, so that no adjacent vertices share the same colour.
+
+# Run
+Run the file called fourcolourings.py
