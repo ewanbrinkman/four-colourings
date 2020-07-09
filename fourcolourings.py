@@ -2,8 +2,9 @@ from random import shuffle
 
 # all available colours to use are stored in this list. When choosing
 # colours for vertices, vertices will be given numbers that represent a
-# colour. 1 will represent colors[0], 2 will represent colors[1], and so on. A
-# colour of 0 means no colour has been chosen yet
+# colour. 1 will represent the first colour in the list, 2 will represent
+# the second colour in the list, and so on. A colour of 0 means no colour has
+# been chosen yet
 vertex_colours = ["red", "yellow", "green", "blue"]
 
 # dictionary to hold all the vertex's colours and their connected vertices
@@ -88,12 +89,14 @@ def colour_vertices(vertices, random):
         # assign the colour
         vertices[vertex_number]['colour'] = smallest_colour
 
+    # count how many of each colour there is
     colour_counter = count_colours(vertices)
 
     return vertices, colour_counter
 
 
 def print_vertex_colours(coloured_vertices_nums, colour_total_nums):
+    # this function will change the numbers into the colours they represent
     # print out each vertex's colour
     print("\nVertices And Their Colours:")
     for vertex_number in coloured_vertices_nums:
