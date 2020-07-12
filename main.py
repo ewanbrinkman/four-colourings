@@ -6,10 +6,16 @@ import sys
 from math import sqrt
 from fourcolourings import *
 
+# all available colours to use are stored in this list. When choosing
+# colours for vertices, vertices will be given numbers that represent a
+# colour. 1 will represent the first colour in the list, 2 will represent
+# the second colour in the list, and so on. A colour of 0 means no colour has
+# been chosen yet
+VERTEX_COLOURS = ["red", "yellow", "green", "blue"]
+# sizes for drawing wth the painter
 VERTEX_PENSIZE = 5
 CONNECTION_PENSIZE = 4
 VERTEX_DIAMETER = 20
-VERTEX_COLOURS = ["red", "yellow", "green", "blue"]
 
 
 class GraphFrame(QtWidgets.QFrame):

@@ -1,13 +1,5 @@
 from random import shuffle
 
-# all available colours to use are stored in this list. When choosing
-# colours for vertices, vertices will be given numbers that represent a
-# colour. 1 will represent the first colour in the list, 2 will represent
-# the second colour in the list, and so on. A colour of 0 means no colour has
-# been chosen yet
-# vertex_colours = ["red", "yellow", "green", "blue"]
-
-# # dictionary to hold all the vertex's colours and their connected vertices
 # vertices_simple = {
 #     1: {"colour": 0, "connections": [2, 6, 9, 10]},
 #     2: {"colour": 0, "connections": [1, 3, 8]},
@@ -20,7 +12,7 @@ from random import shuffle
 #     9: {"colour": 0, "connections": [1, 4, 10]},
 #     10: {"colour": 0, "connections": [1, 4, 9]},
 # }
-#
+
 # vertices_complex = {
 #     1: {"colour": 0, "connections": [3, 7, 10, 15]},
 #     2: {"colour": 0, "connections": [8, 11, 16]},
@@ -45,10 +37,6 @@ def order_vertices(vertex_numbers, random):
     if random:
         # put the vertices in a random order for colouring
         shuffle(vertex_numbers)
-        print("The Vertices Will Be Coloured In A Random Order:",
-              ", ".join([str(i) for i in vertex_numbers]))
-    else:
-        print("No Random Order Will Be Chosen For Colouring Vertices")
 
     return vertex_numbers
 
@@ -57,7 +45,12 @@ def count_colours(vertices):
     # count how many of each colour there is
     colour_counter = {i: 0 for i in range(1, 5)}
     for vertex in vertices:
-        colour_counter[vertices[vertex]['colour']] += 1
+        # add the colour
+        try:
+            colour_counter[vertices[vertex]['colour']] += 1
+        # the vertex is not coloured, don't add it
+        except KeyError as e:
+            pass
 
     return colour_counter
 
@@ -93,25 +86,3 @@ def colour_vertices(vertices, random):
     colour_counter = count_colours(vertices)
 
     return vertices, colour_counter
-
-
-def print_vertex_colours(coloured_vertices_nums, colour_total_nums, colours):
-    # this function will change the numbers into the colours they represent
-    # print out each vertex's colour
-    print("\nVertices And Their Colours:")
-    for vertex_number in coloured_vertices_nums:
-        # get the colour for the vertex
-        vertex_colour = colours[coloured_vertices_nums[vertex_number][
-                                           'colour'] - 1]
-        print(vertex_number, ":", vertex_colour.title())
-
-    # print out the total number of each colour
-    print("\nTotal Number Of Each Colour Used:")
-    for colour, total in colour_total_nums.items():
-        print(colours[colour - 1].title(), ":", total)
-
-
-# colour the vertices so adjacent vertices all have different colours
-# coloured_vertices, colour_total = colour_vertices(vertices_simple, False)
-# print out the result
-# print_vertex_colours(coloured_vertices, colour_total, vertex_colours)
