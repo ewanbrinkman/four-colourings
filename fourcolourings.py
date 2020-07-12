@@ -69,7 +69,7 @@ def colour_vertices(vertices, random):
 
         # get the smallest colour number, if the list is empty, that means
         # there are no chosen colours for the connected vertices yet
-        smallest_colour = 1
+        smallest_colour = 0
         if connected_colours:
             # go through the numbers 1, 2, 3, and 4 until a number is found
             # that is not in connected colours. This number will be the
@@ -78,6 +78,8 @@ def colour_vertices(vertices, random):
                 if i not in connected_colours:
                     smallest_colour = i
                     break
+        else:
+            smallest_colour = 1
 
         # assign the colour
         vertices[vertex_number]['colour'] = smallest_colour
