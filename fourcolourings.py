@@ -95,23 +95,23 @@ def colour_vertices(vertices, random):
     return vertices, colour_counter
 
 
-def print_vertex_colours(coloured_vertices_nums, colour_total_nums):
+def print_vertex_colours(coloured_vertices_nums, colour_total_nums, colours):
     # this function will change the numbers into the colours they represent
     # print out each vertex's colour
     print("\nVertices And Their Colours:")
     for vertex_number in coloured_vertices_nums:
         # get the colour for the vertex
-        vertex_colour = vertex_colours[coloured_vertices_nums[vertex_number][
+        vertex_colour = colours[coloured_vertices_nums[vertex_number][
                                            'colour'] - 1]
         print(vertex_number, ":", vertex_colour.title())
 
     # print out the total number of each colour
     print("\nTotal Number Of Each Colour Used:")
     for colour, total in colour_total_nums.items():
-        print(vertex_colours[colour - 1].title(), ":", total)
+        print(colours[colour - 1].title(), ":", total)
 
 
 # colour the vertices so adjacent vertices all have different colours
 coloured_vertices, colour_total = colour_vertices(vertices_simple, False)
 # print out the result
-print_vertex_colours(coloured_vertices, colour_total)
+print_vertex_colours(coloured_vertices, colour_total, vertex_colours)
