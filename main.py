@@ -4,8 +4,10 @@ from PyQt5.QtGui import QPainter, QPen, QBrush
 from PyQt5.QtCore import Qt
 import sys
 from math import sqrt
+from fourcolourings import *
 
-PENSIZE = 5
+VERTEX_PENSIZE = 5
+CONNECTION_PENSIZE = 4
 VERTEX_DIAMETER = 20
 VERTEX_COLOURS = ["red", "yellow", "green", "blue"]
 
@@ -40,6 +42,25 @@ class GraphFrame(QtWidgets.QFrame):
         # the vertex currently selected to make a connection
         self.selected_vertex = None
 
+    def colour_vertices(self):
+        # reset the colour of all the vertices
+        for vertex in self.vertex_data:
+            self.vertex_data[vertex]['colour'] = 0
+
+        # if the vertices should be coloured in a random order
+        random_colour_order = self.mainWindow.randomCheckBox.isChecked()
+
+        # colour the vertices
+        self.vertex_data, colour_total = colour_vertices(self.vertex_data,
+                                                         random_colour_order)
+        # repaint with the new colours
+        self.repaint()
+
+        # update the main window labels to show how many of each colour
+        # there is
+        self.mainWindow.update_colour_totals(colour_total[1], colour_total[2],
+                                             colour_total[3], colour_total[4])
+
     def get_pos_distance(self, pos1, pos2):
         # get the distance between two points
         return sqrt((pos2[0] - pos1[0]) ** 2 + (pos2[1] - pos1[1]) ** 2)
@@ -73,7 +94,7 @@ class GraphFrame(QtWidgets.QFrame):
             self.graph_vertices[self.current_vertex] = (event.x(), event.y())
             self.vertex_data[self.current_vertex] = {
                 "colour": 0,
-                "connections:": []
+                "connections": []
             }
             self.current_vertex += 1
 
@@ -85,7 +106,24 @@ class GraphFrame(QtWidgets.QFrame):
 
             # the closest vertex must be within a certain distance
             if closest_vertex[0] and closest_vertex[1] <= VERTEX_DIAMETER:
-                self.selected_vertex = closest_vertex[0]
+                # a selected vertex already exists, connect the previously
+                # selected vertex and the clicked vertex right now
+                if self.selected_vertex:
+                    # add the connection to each vertex if it hasn't been
+                    # added already
+                    if closest_vertex[0] not in self.vertex_data[self.selected_vertex]['connections']:
+                        self.vertex_data[self.selected_vertex][
+                            'connections'].append(closest_vertex[0])
+                    if self.selected_vertex not in self.vertex_data[closest_vertex[0]]['connections']:
+                        self.vertex_data[closest_vertex[0]][
+                            'connections'].append(self.selected_vertex)
+                    # remove the selected vertex
+                    self.selected_vertex = None
+                # make the clicked vertex the selected vertex
+                else:
+                    self.selected_vertex = closest_vertex[0]
+            else:
+                self.selected_vertex = None
 
         # erase a vertex
         elif current_mode == "Erase Vertices":
@@ -105,9 +143,29 @@ class GraphFrame(QtWidgets.QFrame):
 
             # erase any vertices in the erase list
             if erase_vertices:
+                # the colour total labels will be updated
+                colour_total = count_colours(self.vertex_data)
+
+                # erase the vertices
                 for vertex in erase_vertices:
+                    # subtract 1 from the colour total of the vertex if it
+                    # is coloured
+                    if self.vertex_data[vertex]['colour']:
+                        colour_total = count_colours(self.vertex_data)
+                        colour_total[self.vertex_data[vertex]['colour']] -= 1
+
+                    # remove all the vertex's connection
+                    for conn in self.vertex_data[vertex]['connections']:
+                        self.vertex_data[conn]['connections'].remove(vertex)
+                    # remove this vertex from the vertex data dictionaries
                     del self.graph_vertices[vertex]
                     del self.vertex_data[vertex]
+
+                # update the colour total labels
+                self.mainWindow.update_colour_totals(colour_total[1],
+                                                     colour_total[2],
+                                                     colour_total[3],
+                                                     colour_total[4])
 
         # update display
         self.update()
@@ -124,13 +182,25 @@ class GraphFrame(QtWidgets.QFrame):
         elif qt_colour == "black":
             return Qt.black
 
-    def colour_painter(self, painter, pen_colour, brush_colour):
+    def colour_painter(self, painter, pen_colour, pen_size, brush_colour,
+                       alpha_brush=False):
         # create the pen and brush with the correct colours
-        pen = QPen(self.get_qt_colour(pen_colour), PENSIZE)
-        brush = QBrush(self.get_qt_colour(brush_colour))
+        if alpha_brush:
+            pen = QPen(self.get_qt_colour(pen_colour), 0)
+        else:
+            pen = QPen(self.get_qt_colour(pen_colour), pen_size)
+        # only make a brush if required
+        if brush_colour:
+            # make the brush alpha if required
+            if alpha_brush:
+                brush = QBrush(self.get_qt_colour(brush_colour), 3)
+            else:
+                brush = QBrush(self.get_qt_colour(brush_colour))
+
         # set the pen and brush to the painter
         painter.setPen(pen)
-        painter.setBrush(brush)
+        if brush_colour:
+            painter.setBrush(brush)
 
         return painter
 
@@ -138,7 +208,19 @@ class GraphFrame(QtWidgets.QFrame):
         # create the painter
         painter = QPainter(self)
 
-        print(self.selected_vertex)
+        # set the painter for the lines to connect vertices
+        painter = self.colour_painter(painter, "black", CONNECTION_PENSIZE,
+                                      False)
+        # draw the connections between all vertices
+        for vertex in self.graph_vertices:
+            # get the position of the vertex on the graph
+            pos = self.graph_vertices[vertex]
+            x_pos, y_pos = pos[0], pos[1]
+
+            # draw all its connections
+            for conn in self.vertex_data[vertex]['connections']:
+                painter.drawLine(x_pos, y_pos, self.graph_vertices[conn][0],
+                                 self.graph_vertices[conn][1])
 
         # draw all the vertices
         for vertex in self.graph_vertices:
@@ -146,15 +228,26 @@ class GraphFrame(QtWidgets.QFrame):
             pos = self.graph_vertices[vertex]
             x_pos, y_pos = pos[0], pos[1]
 
+            # colour the vertex transparent if it is selected
+            if self.selected_vertex == vertex:
+                painter = self.colour_painter(painter, "yellow",
+                                              VERTEX_PENSIZE, "yellow", True)
+                # draw the selection circle
+                painter.drawEllipse(x_pos - VERTEX_DIAMETER,
+                                    y_pos - VERTEX_DIAMETER,
+                                    VERTEX_DIAMETER * 2, VERTEX_DIAMETER * 2)
+
             # create the painter to match the vertex's current colour
             vertex_colour = self.vertex_data[vertex]['colour']
 
             if vertex_colour == 0:
-                painter = self.colour_painter(painter, "black", "yellow")
+                painter = self.colour_painter(painter, "black", VERTEX_PENSIZE,
+                                              "yellow")
             else:
                 painter = self.colour_painter(painter,
-                    VERTEX_COLOURS[vertex_colour-1],
-                    VERTEX_COLOURS[vertex_colour-1])
+                                              VERTEX_COLOURS[vertex_colour-1],
+                                              VERTEX_PENSIZE,
+                                              VERTEX_COLOURS[vertex_colour-1])
 
             # draw the vertex
             painter.drawEllipse(x_pos - VERTEX_DIAMETER / 2,
@@ -211,7 +304,9 @@ class Ui_MainWindow(object):
         self.verticalLayout_3.addWidget(self.colourButton)
         self.gridLayout.addWidget(self.colouringBox, 1, 0, 1, 1)
         # spacer so the above groups don't stretch, instead the spacer will
-        spacerItem = QtWidgets.QSpacerItem(0, 0, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
+        spacerItem = QtWidgets.QSpacerItem(0, 0,
+                                           QtWidgets.QSizePolicy.Minimum,
+                                           QtWidgets.QSizePolicy.Expanding)
         self.gridLayout.addItem(spacerItem, 2, 0, 1, 1)
         # line at the bottom
         self.line = QtWidgets.QFrame(self.centralwidget)
@@ -244,7 +339,6 @@ class Ui_MainWindow(object):
         self.clearButton = QtWidgets.QPushButton(self.graphOptionsWidget)
         self.clearButton.setObjectName("clearButton")
         self.horizontalLayout.addWidget(self.clearButton)
-        self.clearButton.clicked.connect(self.button_clear_all)
         self.verticalLayout.addWidget(self.graphOptionsWidget)
         # graph frame to draw vertices and their connections
         self.graphFrame = GraphFrame(self, self.graphBox)
@@ -261,6 +355,10 @@ class Ui_MainWindow(object):
         self.statusbar = QtWidgets.QStatusBar(MainWindow)
         self.statusbar.setObjectName("statusbar")
         MainWindow.setStatusBar(self.statusbar)
+
+        # button connections
+        self.clearButton.clicked.connect(self.button_clear_all)
+        self.colourButton.clicked.connect(self.graphFrame.colour_vertices)
 
         self.retranslateUi(MainWindow)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
@@ -295,6 +393,18 @@ class Ui_MainWindow(object):
         self.graphFrame.selected_vertex = None
         # update the graph frame by repainting it
         self.graphFrame.repaint()
+        # update the colour totals
+        self.update_colour_totals(0, 0, 0, 0)
+
+    def update_colour_totals(self, colour1, colour2, colour3, colour4):
+        self.colour1Label.setText(f"Red: {colour1}")
+        self.colour1Label.repaint()
+        self.colour2Label.setText(f"Yellow: {colour2}")
+        self.colour2Label.repaint()
+        self.colour3Label.setText(f"Green: {colour3}")
+        self.colour3Label.repaint()
+        self.colour4Label.setText(f"Blue: {colour4}")
+        self.colour4Label.repaint()
 
 
 if __name__ == "__main__":

@@ -5,40 +5,40 @@ from random import shuffle
 # colour. 1 will represent the first colour in the list, 2 will represent
 # the second colour in the list, and so on. A colour of 0 means no colour has
 # been chosen yet
-vertex_colours = ["red", "yellow", "green", "blue"]
+# vertex_colours = ["red", "yellow", "green", "blue"]
 
-# dictionary to hold all the vertex's colours and their connected vertices
-vertices_simple = {
-    1: {"colour": 0, "connections": [2, 6, 9, 10]},
-    2: {"colour": 0, "connections": [1, 3, 8]},
-    3: {"colour": 0, "connections": [2, 4, 8]},
-    4: {"colour": 0, "connections": [3, 5, 7, 8, 9, 10]},
-    5: {"colour": 0, "connections": [4, 6, 7]},
-    6: {"colour": 0, "connections": [1, 5, 7]},
-    7: {"colour": 0, "connections": [4, 5, 6]},
-    8: {"colour": 0, "connections": [2, 3, 4]},
-    9: {"colour": 0, "connections": [1, 4, 10]},
-    10: {"colour": 0, "connections": [1, 4, 9]},
-}
-
-vertices_complex = {
-    1: {"colour": 0, "connections": [3, 7, 10, 15]},
-    2: {"colour": 0, "connections": [8, 11, 16]},
-    3: {"colour": 0, "connections": [1, 4, 13]},
-    4: {"colour": 0, "connections": [3, 5, 13]},
-    5: {"colour": 0, "connections": [4, 6, 9, 10, 11, 12, 13, 14, 15, 16]},
-    6: {"colour": 0, "connections": [5, 7, 12]},
-    7: {"colour": 0, "connections": [6, 1, 12]},
-    8: {"colour": 0, "connections": [2, 9, 14]},
-    9: {"colour": 0, "connections": [5, 8, 14]},
-    10: {"colour": 0, "connections": [5, 1, 15]},
-    11: {"colour": 0, "connections": [5, 2, 16]},
-    12: {"colour": 0, "connections": [5, 6, 7]},
-    13: {"colour": 0, "connections": [5, 3, 4]},
-    14: {"colour": 0, "connections": [5, 8, 9]},
-    15: {"colour": 0, "connections": [5, 1, 10]},
-    16: {"colour": 0, "connections": [5, 2, 11]},
-}
+# # dictionary to hold all the vertex's colours and their connected vertices
+# vertices_simple = {
+#     1: {"colour": 0, "connections": [2, 6, 9, 10]},
+#     2: {"colour": 0, "connections": [1, 3, 8]},
+#     3: {"colour": 0, "connections": [2, 4, 8]},
+#     4: {"colour": 0, "connections": [3, 5, 7, 8, 9, 10]},
+#     5: {"colour": 0, "connections": [4, 6, 7]},
+#     6: {"colour": 0, "connections": [1, 5, 7]},
+#     7: {"colour": 0, "connections": [4, 5, 6]},
+#     8: {"colour": 0, "connections": [2, 3, 4]},
+#     9: {"colour": 0, "connections": [1, 4, 10]},
+#     10: {"colour": 0, "connections": [1, 4, 9]},
+# }
+#
+# vertices_complex = {
+#     1: {"colour": 0, "connections": [3, 7, 10, 15]},
+#     2: {"colour": 0, "connections": [8, 11, 16]},
+#     3: {"colour": 0, "connections": [1, 4, 13]},
+#     4: {"colour": 0, "connections": [3, 5, 13]},
+#     5: {"colour": 0, "connections": [4, 6, 9, 10, 11, 12, 13, 14, 15, 16]},
+#     6: {"colour": 0, "connections": [5, 7, 12]},
+#     7: {"colour": 0, "connections": [6, 1, 12]},
+#     8: {"colour": 0, "connections": [2, 9, 14]},
+#     9: {"colour": 0, "connections": [5, 8, 14]},
+#     10: {"colour": 0, "connections": [5, 1, 15]},
+#     11: {"colour": 0, "connections": [5, 2, 16]},
+#     12: {"colour": 0, "connections": [5, 6, 7]},
+#     13: {"colour": 0, "connections": [5, 3, 4]},
+#     14: {"colour": 0, "connections": [5, 8, 9]},
+#     15: {"colour": 0, "connections": [5, 1, 10]},
+#     16: {"colour": 0, "connections": [5, 2, 11]},
+# }
 
 
 def order_vertices(vertex_numbers, random):
@@ -112,6 +112,6 @@ def print_vertex_colours(coloured_vertices_nums, colour_total_nums, colours):
 
 
 # colour the vertices so adjacent vertices all have different colours
-coloured_vertices, colour_total = colour_vertices(vertices_simple, False)
+# coloured_vertices, colour_total = colour_vertices(vertices_simple, False)
 # print out the result
-print_vertex_colours(coloured_vertices, colour_total, vertex_colours)
+# print_vertex_colours(coloured_vertices, colour_total, vertex_colours)
