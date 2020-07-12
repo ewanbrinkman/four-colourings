@@ -1,8 +1,13 @@
 from PyQt5 import QtWidgets, QtGui, QtCore
 from PyQt5.QtWidgets import QApplication, QMainWindow
-from PyQt5.QtGui import QPainter, QPen
+from PyQt5.QtGui import QPainter, QPen, QBrush
 from PyQt5.QtCore import Qt
 import sys
+from math import sqrt
+
+PENSIZE = 5
+VERTEX_DIAMETER = 20
+VERTEX_COLOURS = ["red", "yellow", "green", "blue"]
 
 
 class GraphFrame(QtWidgets.QFrame):
@@ -25,25 +30,136 @@ class GraphFrame(QtWidgets.QFrame):
             "border-color: rgb(0, 0, 0)}"
             )
 
-        # stores vertices
-        self.points = []
+        # graph vertices stores all the vertex positions on the graph frame
+        self.graph_vertices = {}
+        # vertex data stores the colour and connections of the vertices
+        self.vertex_data = {}
+        # current vertex is the vertex id to use next
+        self.current_vertex = 1
+
+        # the vertex currently selected to make a connection
+        self.selected_vertex = None
+
+    def get_pos_distance(self, pos1, pos2):
+        # get the distance between two points
+        return sqrt((pos2[0] - pos1[0]) ** 2 + (pos2[1] - pos1[1]) ** 2)
+
+    def get_closest_vertex(self, mouse_pos, vertices):
+        # get the distances from the position clicked to the positions
+        # of all the vertices
+        smallest_distance = (None, 0)
+        for vertex, pos in vertices.items():
+            # find the distance to the point
+            distance = self.get_pos_distance((mouse_pos.x(), mouse_pos.y()),
+                                             (pos[0], pos[1]))
+
+            # no smallest distance yet, this distance will become the
+            # smallest distance
+            if not smallest_distance[1]:
+                smallest_distance = (vertex, distance)
+            # make the new distance the smallest distance, if it is smaller
+            else:
+                if distance < smallest_distance[1]:
+                    smallest_distance = (vertex, distance)
+
+        return smallest_distance
 
     def mousePressEvent(self, event):
+        # get the current mode of the graph
         current_mode = self.mainWindow.modeComboBox.currentText()
+        # create a vertex at the clicked position
         if current_mode == "Create Vertices":
-            # get click position
-            self.points.append((event.x(), event.y()))
+            # create a new vertex at the clicked position
+            self.graph_vertices[self.current_vertex] = (event.x(), event.y())
+            self.vertex_data[self.current_vertex] = {
+                "colour": 0,
+                "connections:": []
+            }
+            self.current_vertex += 1
+
+        # connect vertices with a line
+        elif current_mode == "Create Connections":
+            # get the closest vertex to the mouse click
+            closest_vertex = self.get_closest_vertex(event,
+                                                     self.graph_vertices)
+
+            # the closest vertex must be within a certain distance
+            if closest_vertex[0] and closest_vertex[1] <= VERTEX_DIAMETER:
+                self.selected_vertex = closest_vertex[0]
+
+        # erase a vertex
+        elif current_mode == "Erase Vertices":
+            # list to hold vertices to be removed
+            erase_vertices = []
+            # get the distances from the position clicked to the positions
+            # of all the vertices
+            for vertex, pos in self.graph_vertices.items():
+                # find the distance to the point
+                distance = self.get_pos_distance((event.x(), event.y()),
+                                                 (pos[0], pos[1]))
+                # add the vertex to a list of vertices to be erased
+                # don't erase the vertex in the loop, as that will change
+                # the size the dictionary during iteration
+                if distance <= VERTEX_DIAMETER:
+                    erase_vertices.append(vertex)
+
+            # erase any vertices in the erase list
+            if erase_vertices:
+                for vertex in erase_vertices:
+                    del self.graph_vertices[vertex]
+                    del self.vertex_data[vertex]
+
         # update display
         self.update()
 
-    def paintEvent(self, event):
-        # create the painter and pen
-        painter = QPainter(self)
-        pen = QPen(Qt.red, 5)
+    def get_qt_colour(self, qt_colour):
+        if qt_colour == "red":
+            return Qt.red
+        elif qt_colour == "yellow":
+            return Qt.yellow
+        elif qt_colour == "green":
+            return Qt.green
+        elif qt_colour == "blue":
+            return Qt.blue
+        elif qt_colour == "black":
+            return Qt.black
+
+    def colour_painter(self, painter, pen_colour, brush_colour):
+        # create the pen and brush with the correct colours
+        pen = QPen(self.get_qt_colour(pen_colour), PENSIZE)
+        brush = QBrush(self.get_qt_colour(brush_colour))
+        # set the pen and brush to the painter
         painter.setPen(pen)
-        # draw all the points
-        for point in self.points:
-            painter.drawEllipse(point[0], point[1], 10, 10)
+        painter.setBrush(brush)
+
+        return painter
+
+    def paintEvent(self, event):
+        # create the painter
+        painter = QPainter(self)
+
+        print(self.selected_vertex)
+
+        # draw all the vertices
+        for vertex in self.graph_vertices:
+            # get the position of the vertex on the graph
+            pos = self.graph_vertices[vertex]
+            x_pos, y_pos = pos[0], pos[1]
+
+            # create the painter to match the vertex's current colour
+            vertex_colour = self.vertex_data[vertex]['colour']
+
+            if vertex_colour == 0:
+                painter = self.colour_painter(painter, "black", "yellow")
+            else:
+                painter = self.colour_painter(painter,
+                    VERTEX_COLOURS[vertex_colour-1],
+                    VERTEX_COLOURS[vertex_colour-1])
+
+            # draw the vertex
+            painter.drawEllipse(x_pos - VERTEX_DIAMETER / 2,
+                                y_pos - VERTEX_DIAMETER / 2,
+                                VERTEX_DIAMETER, VERTEX_DIAMETER)
 
 
 class Ui_MainWindow(object):
@@ -174,7 +290,9 @@ class Ui_MainWindow(object):
 
     def button_clear_all(self):
         # remove all vertices
-        self.graphFrame.points.clear()
+        self.graphFrame.graph_vertices.clear()
+        self.graphFrame.vertex_data.clear()
+        self.graphFrame.selected_vertex = None
         # update the graph frame by repainting it
         self.graphFrame.repaint()
 
