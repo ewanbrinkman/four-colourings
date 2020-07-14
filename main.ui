@@ -64,6 +64,13 @@
          </property>
         </widget>
        </item>
+       <item>
+        <widget class="QLabel" name="colour5Label">
+         <property name="text">
+          <string>Magenta: 0</string>
+         </property>
+        </widget>
+       </item>
       </layout>
      </widget>
     </item>
@@ -84,15 +91,50 @@
       <property name="title">
        <string>Colouring</string>
       </property>
-      <layout class="QVBoxLayout" name="verticalLayout_3">
-       <item>
+      <layout class="QGridLayout" name="gridLayout_2">
+       <item row="0" column="1">
+        <widget class="QSpinBox" name="maxColoursSpinBox">
+         <property name="minimumSize">
+          <size>
+           <width>0</width>
+           <height>0</height>
+          </size>
+         </property>
+         <property name="layoutDirection">
+          <enum>Qt::LeftToRight</enum>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+         </property>
+         <property name="minimum">
+          <number>1</number>
+         </property>
+         <property name="maximum">
+          <number>5</number>
+         </property>
+         <property name="value">
+          <number>4</number>
+         </property>
+         <property name="displayIntegerBase">
+          <number>10</number>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="0">
+        <widget class="QLabel" name="maxColoursLabel">
+         <property name="text">
+          <string>Max Colours:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="0" colspan="3">
         <widget class="QCheckBox" name="randomCheckBox">
          <property name="text">
           <string>Random Colour Order</string>
          </property>
         </widget>
        </item>
-       <item>
+       <item row="2" column="0" colspan="3">
         <widget class="QPushButton" name="colourButton">
          <property name="text">
           <string>Colour</string>

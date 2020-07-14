@@ -48,7 +48,13 @@ class GraphFrame(QtWidgets.QFrame):
         # the vertex currently selected to make a connection
         self.selected_vertex = None
 
+        # the max numbers of colours to use when colouring
+        self.max_colours = self.mainWindow.maxColoursSpinBox.value()
+
     def colour_vertices(self):
+        # get the max number of colours to use for colouring
+        self.max_colours = self.mainWindow.maxColoursSpinBox.value()
+
         # reset the colour of all the vertices
         for vertex in self.vertex_data:
             self.vertex_data[vertex]['colour'] = 0
@@ -57,16 +63,17 @@ class GraphFrame(QtWidgets.QFrame):
         random_colour_order = self.mainWindow.randomCheckBox.isChecked()
 
         # colour the vertices
-        self.vertex_data, colour_total = colour_vertices(self.vertex_data, 5,
+        self.vertex_data, colour_total = colour_vertices(self.vertex_data,
+                                                         self.max_colours,
                                                          random_colour_order)
         # repaint with the new colours
         self.repaint()
 
         # update the main window labels to show how many of each colour
-        print(colour_total)
         # there is
         self.mainWindow.update_colour_totals(colour_total[1], colour_total[2],
-                                             colour_total[3], colour_total[4])
+                                             colour_total[3], colour_total[4],
+                                             colour_total[5])
 
     def get_pos_distance(self, pos1, pos2):
         # get the distance between two points
@@ -151,14 +158,16 @@ class GraphFrame(QtWidgets.QFrame):
             # erase any vertices in the erase list
             if erase_vertices:
                 # the colour total labels will be updated
-                colour_total = count_colours(self.vertex_data, 5)
+                colour_total = count_colours(self.vertex_data,
+                                             self.max_colours)
 
                 # erase the vertices
                 for vertex in erase_vertices:
                     # subtract 1 from the colour total of the vertex if it
                     # is coloured
                     if self.vertex_data[vertex]['colour']:
-                        colour_total = count_colours(self.vertex_data, 5)
+                        colour_total = count_colours(self.vertex_data,
+                                                     self.max_colours)
                         colour_total[self.vertex_data[vertex]['colour']] -= 1
 
                     # remove all the vertex's connection
@@ -172,7 +181,8 @@ class GraphFrame(QtWidgets.QFrame):
                 self.mainWindow.update_colour_totals(colour_total[1],
                                                      colour_total[2],
                                                      colour_total[3],
-                                                     colour_total[4])
+                                                     colour_total[4],
+                                                     colour_total[5])
 
         # update display
         self.update()
@@ -295,22 +305,41 @@ class Ui_MainWindow(object):
         self.colour4Label = QtWidgets.QLabel(self.statsBox)
         self.colour4Label.setObjectName("colour4Label")
         self.verticalLayout_2.addWidget(self.colour4Label)
+        self.colour5Label = QtWidgets.QLabel(self.statsBox)
+        self.colour5Label.setObjectName("colour5Label")
+        self.verticalLayout_2.addWidget(self.colour5Label)
         self.gridLayout.addWidget(self.statsBox, 0, 0, 1, 1)
         # group to hold the colouring widgets
         self.colouringBox = QtWidgets.QGroupBox(self.centralwidget)
         self.colouringBox.setMinimumSize(QtCore.QSize(200, 125))
         self.colouringBox.setMaximumSize(QtCore.QSize(200, 125))
         self.colouringBox.setObjectName("colouringBox")
-        self.verticalLayout_3 = QtWidgets.QVBoxLayout(self.colouringBox)
-        self.verticalLayout_3.setObjectName("verticalLayout_3")
+        self.gridLayout_2 = QtWidgets.QGridLayout(self.colouringBox)
+        self.gridLayout_2.setObjectName("gridLayout_2")
+        # max colours spin box
+        self.maxColoursSpinBox = QtWidgets.QSpinBox(self.colouringBox)
+        self.maxColoursSpinBox.setMinimumSize(QtCore.QSize(0, 0))
+        self.maxColoursSpinBox.setLayoutDirection(QtCore.Qt.LeftToRight)
+        self.maxColoursSpinBox.setAlignment(
+            QtCore.Qt.AlignLeading | QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter)
+        self.maxColoursSpinBox.setMinimum(1)
+        self.maxColoursSpinBox.setMaximum(5)
+        self.maxColoursSpinBox.setProperty("value", 4)
+        self.maxColoursSpinBox.setDisplayIntegerBase(10)
+        self.maxColoursSpinBox.setObjectName("maxColoursSpinBox")
+        self.gridLayout_2.addWidget(self.maxColoursSpinBox, 0, 1, 1, 1)
+        # max colours label
+        self.maxColoursLabel = QtWidgets.QLabel(self.colouringBox)
+        self.maxColoursLabel.setObjectName("maxColoursLabel")
+        self.gridLayout_2.addWidget(self.maxColoursLabel, 0, 0, 1, 1)
         # random colour check box
         self.randomCheckBox = QtWidgets.QCheckBox(self.colouringBox)
         self.randomCheckBox.setObjectName("randomCheckBox")
-        self.verticalLayout_3.addWidget(self.randomCheckBox)
+        self.gridLayout_2.addWidget(self.randomCheckBox, 1, 0, 1, 3)
         # colour the vertices button
         self.colourButton = QtWidgets.QPushButton(self.colouringBox)
         self.colourButton.setObjectName("colourButton")
-        self.verticalLayout_3.addWidget(self.colourButton)
+        self.gridLayout_2.addWidget(self.colourButton, 2, 0, 1, 3)
         self.gridLayout.addWidget(self.colouringBox, 1, 0, 1, 1)
         # spacer so the above groups don't stretch, instead the spacer will
         spacerItem = QtWidgets.QSpacerItem(0, 0,
@@ -381,7 +410,9 @@ class Ui_MainWindow(object):
         self.colour2Label.setText(_translate("MainWindow", "Yellow: 0"))
         self.colour3Label.setText(_translate("MainWindow", "Green: 0"))
         self.colour4Label.setText(_translate("MainWindow", "Blue: 0"))
+        self.colour5Label.setText(_translate("MainWindow", "Magenta: 0"))
         self.colouringBox.setTitle(_translate("MainWindow", "Colouring"))
+        self.maxColoursLabel.setText(_translate("MainWindow", "Max Colours:"))
         self.randomCheckBox.setText(_translate("MainWindow", "Random Colour "
                                                              "Order"))
         self.colourButton.setText(_translate("MainWindow", "Colour"))
@@ -407,9 +438,10 @@ class Ui_MainWindow(object):
         # update the graph frame by repainting it
         self.graphFrame.repaint()
         # update the colour totals
-        self.update_colour_totals(0, 0, 0, 0)
+        self.update_colour_totals(0, 0, 0, 0, 0)
 
-    def update_colour_totals(self, colour1, colour2, colour3, colour4):
+    def update_colour_totals(self, colour1, colour2, colour3, colour4,
+                             colour5):
         self.colour1Label.setText(f"Red: {colour1}")
         self.colour1Label.repaint()
         self.colour2Label.setText(f"Yellow: {colour2}")
@@ -418,6 +450,8 @@ class Ui_MainWindow(object):
         self.colour3Label.repaint()
         self.colour4Label.setText(f"Blue: {colour4}")
         self.colour4Label.repaint()
+        self.colour5Label.setText(f"Magenta: {colour5}")
+        self.colour5Label.repaint()
 
 
 if __name__ == "__main__":

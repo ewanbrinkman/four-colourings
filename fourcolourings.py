@@ -42,8 +42,9 @@ def order_vertices(vertex_numbers, random):
 
 
 def count_colours(vertices, max_colours):
-    # count how many of each colour there is
-    colour_counter = {i: 0 for i in range(1, (max_colours + 1))}
+    # count how many of each colour there is, the max amount if 5, so in the
+    # for loop use 6, which makes the loop end at 5
+    colour_counter = {i: 0 for i in range(1, 6)}
     for vertex in vertices:
         # add the colour
         try:
