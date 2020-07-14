@@ -41,9 +41,9 @@ def order_vertices(vertex_numbers, random):
     return vertex_numbers
 
 
-def count_colours(vertices):
+def count_colours(vertices, max_colours):
     # count how many of each colour there is
-    colour_counter = {i: 0 for i in range(1, 5)}
+    colour_counter = {i: 0 for i in range(1, (max_colours + 1))}
     for vertex in vertices:
         # add the colour
         try:
@@ -55,7 +55,7 @@ def count_colours(vertices):
     return colour_counter
 
 
-def colour_vertices(vertices, random):
+def colour_vertices(vertices, max_colours, random):
     # colour all vertices so that all connected vertices are different colours
     vertex_order = order_vertices(list(vertices.keys()), random)
     for vertex_number in vertex_order:
@@ -74,7 +74,7 @@ def colour_vertices(vertices, random):
             # go through the numbers 1, 2, 3, and 4 until a number is found
             # that is not in connected colours. This number will be the
             # smallest colour to use
-            for i in range(1, 5):
+            for i in range(1, (max_colours + 1)):
                 if i not in connected_colours:
                     smallest_colour = i
                     break
@@ -85,6 +85,6 @@ def colour_vertices(vertices, random):
         vertices[vertex_number]['colour'] = smallest_colour
 
     # count how many of each colour there is
-    colour_counter = count_colours(vertices)
+    colour_counter = count_colours(vertices, max_colours)
 
     return vertices, colour_counter

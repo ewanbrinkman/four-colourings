@@ -11,7 +11,7 @@ from fourcolourings import *
 # colour. 1 will represent the first colour in the list, 2 will represent
 # the second colour in the list, and so on. A colour of 0 means no colour has
 # been chosen yet
-VERTEX_COLOURS = ["red", "yellow", "green", "blue"]
+VERTEX_COLOURS = ["red", "yellow", "green", "blue", "magenta"]
 # sizes for drawing wth the painter
 VERTEX_PENSIZE = 5
 CONNECTION_PENSIZE = 4
@@ -57,12 +57,13 @@ class GraphFrame(QtWidgets.QFrame):
         random_colour_order = self.mainWindow.randomCheckBox.isChecked()
 
         # colour the vertices
-        self.vertex_data, colour_total = colour_vertices(self.vertex_data,
+        self.vertex_data, colour_total = colour_vertices(self.vertex_data, 5,
                                                          random_colour_order)
         # repaint with the new colours
         self.repaint()
 
         # update the main window labels to show how many of each colour
+        print(colour_total)
         # there is
         self.mainWindow.update_colour_totals(colour_total[1], colour_total[2],
                                              colour_total[3], colour_total[4])
@@ -105,7 +106,7 @@ class GraphFrame(QtWidgets.QFrame):
             self.current_vertex += 1
 
         # connect vertices with a line
-        elif current_mode == "Create Connections":
+        elif current_mode == "Create Edges":
             # get the closest vertex to the mouse click
             closest_vertex = self.get_closest_vertex(event,
                                                      self.graph_vertices)
@@ -150,14 +151,14 @@ class GraphFrame(QtWidgets.QFrame):
             # erase any vertices in the erase list
             if erase_vertices:
                 # the colour total labels will be updated
-                colour_total = count_colours(self.vertex_data)
+                colour_total = count_colours(self.vertex_data, 5)
 
                 # erase the vertices
                 for vertex in erase_vertices:
                     # subtract 1 from the colour total of the vertex if it
                     # is coloured
                     if self.vertex_data[vertex]['colour']:
-                        colour_total = count_colours(self.vertex_data)
+                        colour_total = count_colours(self.vertex_data, 5)
                         colour_total[self.vertex_data[vertex]['colour']] -= 1
 
                     # remove all the vertex's connection
@@ -185,7 +186,9 @@ class GraphFrame(QtWidgets.QFrame):
             return Qt.green
         elif qt_colour == "blue":
             return Qt.blue
-        elif qt_colour == "black":
+        elif qt_colour == "magenta":
+            return Qt.magenta
+        else:
             return Qt.black
 
     def colour_painter(self, painter, pen_colour, pen_size, brush_colour,
@@ -379,12 +382,16 @@ class Ui_MainWindow(object):
         self.colour3Label.setText(_translate("MainWindow", "Green: 0"))
         self.colour4Label.setText(_translate("MainWindow", "Blue: 0"))
         self.colouringBox.setTitle(_translate("MainWindow", "Colouring"))
-        self.randomCheckBox.setText(_translate("MainWindow", "Random Colour Order"))
+        self.randomCheckBox.setText(_translate("MainWindow", "Random Colour "
+                                                             "Order"))
         self.colourButton.setText(_translate("MainWindow", "Colour"))
         self.graphBox.setTitle(_translate("MainWindow", "Graph"))
-        self.modeComboBox.setItemText(0, _translate("MainWindow", "Create Vertices"))
-        self.modeComboBox.setItemText(1, _translate("MainWindow", "Create Connections"))
-        self.modeComboBox.setItemText(2, _translate("MainWindow", "Erase Vertices"))
+        self.modeComboBox.setItemText(0, _translate("MainWindow", "Create "
+                                                                  "Vertices"))
+        self.modeComboBox.setItemText(1, _translate("MainWindow", "Create "
+                                                                  "Edges"))
+        self.modeComboBox.setItemText(2, _translate("MainWindow", "Erase "
+                                                                  "Vertices"))
         self.clearButton.setText(_translate("MainWindow", "Clear All"))
 
     def paintEvent(self, event):
