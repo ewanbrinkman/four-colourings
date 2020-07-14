@@ -322,7 +322,7 @@ class Ui_MainWindow(object):
         self.maxColoursSpinBox.setLayoutDirection(QtCore.Qt.LeftToRight)
         self.maxColoursSpinBox.setAlignment(
             QtCore.Qt.AlignLeading | QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter)
-        self.maxColoursSpinBox.setMinimum(1)
+        self.maxColoursSpinBox.setMinimum(2)
         self.maxColoursSpinBox.setMaximum(5)
         self.maxColoursSpinBox.setProperty("value", 4)
         self.maxColoursSpinBox.setDisplayIntegerBase(10)
